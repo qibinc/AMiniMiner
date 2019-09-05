@@ -44,7 +44,7 @@ def lcs(X, Y):
 def get_cited_line(content, title):
     scores = []
     for line in content.split("\n"):
-        if "tang" not in line.lower() or "lou" not in line.lower():
+        if "tang" not in line.lower() or "wu" not in line.lower():
             continue
         scores.append((lcs(line.lower(), title.lower()), line))
     if scores == []:
@@ -67,6 +67,21 @@ if __name__ == "__main__":
             with open(os.path.join(args.dir, fname)) as f:
                 content = f.read()
                 score, line = get_cited_line(content, args.title)
-                for col, s in enumerate([fname, score, line]):
+                line = line or "0"
+                match = re.findall(r'\[(\d*)\]', line)
+                match = match or ['0']
+                # res = content.index(str(match[0]))
+                # pattern = r'\[^\]*{match[0]}^\]*\]'
+                # print(r'\[^\]*{match[0]}^\]*\]')
+                # res = re.findall(pattern, content)
+                res = re.findall(r'\[[^\]]*' + str(match[0]) + r'[^\]]*\]', content)
+                # res = content.index(match[0])
+                # print(res)
+                if res == []:
+                    res = [content[0]]
+                res = content.index(res[0])
+                res = content[res-100:res+100].replace('\n', ' ')
+                # res = '.'.join(res.split('.')[1:-1]) + '.'
+                for col, s in enumerate([fname, score, line, str(match[0]), res]):
                     sheet.write(row,col,s)
         book.save('papers.xls')
